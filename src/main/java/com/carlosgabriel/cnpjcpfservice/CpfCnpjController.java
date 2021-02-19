@@ -23,7 +23,7 @@ public class CpfCnpjController {
 	 */
 	@PostMapping(value = "/postCpf", consumes = "application/json", produces = "application/json")
     public String postCPF(@RequestBody Cpf value) {
-		Message result = new Message(counter.incrementAndGet(), String.format(cpfTemplate, !value.getValue().equals("") ? "Sim" : "Não"));
+		Message result = new Message(counter.incrementAndGet(), String.format(cpfTemplate, value.isValid() ? "Sim" : "Não"));
         return "{\"result\": {\"msg\": \"" +  result.getContent() + "\", \"isValid\": " + (!value.getValue().equals("") ? "true" : "false")  + "}}";
     }
 	
@@ -34,7 +34,7 @@ public class CpfCnpjController {
 	 */
 	@PostMapping(value = "/postCnpj", consumes = "application/json", produces = "application/json")
     public String postCNPJ(@RequestBody Cnpj value) {
-		Message result = new Message(counter.incrementAndGet(), String.format(cnpjTemplate, !value.getValue().equals("") ? "Sim" : "Não"));
+		Message result = new Message(counter.incrementAndGet(), String.format(cnpjTemplate, value.isValid() ? "Sim" : "Não"));
         return "{\"result\": {\"msg\": \"" +  result.getContent() + "\", \"isValid\": " + (!value.getValue().equals("") ? "true" : "false")  + "}}";
     }
 	
