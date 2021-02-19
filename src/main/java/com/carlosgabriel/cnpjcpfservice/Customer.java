@@ -5,6 +5,12 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+/**
+ * Entidade referente ao Cliente que faz a requisição
+ * de validação de CPF/CNPJ
+ * @author Carlos Gabriel
+ *
+ */
 @Entity
 @Table(name = "customer")
 public class Customer implements Serializable{

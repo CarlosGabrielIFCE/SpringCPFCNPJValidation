@@ -6,6 +6,12 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * Entidade referente às solicitações
+ * de CPF e CNPJ
+ * @author Carlos Gabriel
+ *
+ */
 @Entity
 @Table(name = "solicitation")
 public class Solicitation implements Serializable{

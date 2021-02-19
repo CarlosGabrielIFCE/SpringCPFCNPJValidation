@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller responsável por lidar com as operações
+ * referentes às Solicitações
+ * @author Carlos Gabriel
+ *
+ */
 @RestController
 @RequestMapping("/api")
 public class SolicitationController {
