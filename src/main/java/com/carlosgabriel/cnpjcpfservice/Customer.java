@@ -26,6 +26,9 @@ public class Customer implements Serializable{
 	@Column(name = "password")
 	private String password;
 	
+	@Column(name = "payment")
+	private Double payment = 0.0;
+	
 	@OneToMany(mappedBy="customer")
 	private Set<Solicitation> solicitations;
 
@@ -59,6 +62,14 @@ public class Customer implements Serializable{
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Double getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Double payment) {
+		this.payment = payment;
 	}
 
 	public Set<Solicitation> getSolicitations() {

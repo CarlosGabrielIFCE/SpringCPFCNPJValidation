@@ -18,17 +18,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller responsável por lidar com as operações
- * referentes aos Customers
+ * Customers Controller
+ * Contains all REST Functions from Customers
  * @author Carlos Gabriel
  *
  */
 @RestController
 @RequestMapping("/api")
 public class CustomerController {
+	
 	@Autowired
 	private CustomerRepository customerRepository;
 	
+	@Autowired
+	private SolicitationRepository solicitationRepository;
+	
+	/**
+	 * Return all customers from the database
+	 * @param mail
+	 * @return
+	 */
 	@GetMapping("/customers")
 	public ResponseEntity<List<Customer>> getAllCustomers(@RequestParam(required = false) String mail) {
 		try {
@@ -49,6 +58,11 @@ public class CustomerController {
 		}
 	}
 
+	/**
+	 * Return a Customer from the database
+	 * @param id
+	 * @return
+	 */
 	@GetMapping("/customers/{id}")
 	public ResponseEntity<Customer> getCustomerById(@PathVariable("id") long id) {
 		Optional<Customer> customerData = customerRepository.findById(id);
@@ -59,7 +73,59 @@ public class CustomerController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	/**
+	 * Return a Customer's total payment value
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("/customers/{id}/payment")
+	public CustomerPaymentJson getCustomerPaymentById(@PathVariable("id") long id) {
+		Optional<Customer> customerData = customerRepository.findById(id);
+		final CustomerPaymentJson returnValue = new CustomerPaymentJson();
+		if (customerData.isPresent()) {
+			returnValue.setPaymentValue(customerData.get().getPayment());
+			returnValue.setStatus("Success returned value.");
+		} else {
+			returnValue.setPaymentValue(0.0);
+			returnValue.setStatus("Customer is not present in our database...");
+		}
+		return returnValue;
+	}
+	
+	/**
+	 * Return a Customer's month payment value
+	 * @param id
+	 * @param month
+	 * @return
+	 */
+	@GetMapping("/customers/{id}/payment/{month}")
+	public CustomerPaymentJson getCustomerPaymentByMonth(@PathVariable("id") long id, @PathVariable String month) {
+		Optional<Customer> customerData = customerRepository.findById(id);
+		final CustomerPaymentJson returnValue = new CustomerPaymentJson();
+		Double paymentMonthValue = 0.0;
+		Integer monthValue = Integer.parseInt(month);
+		if (customerData.isPresent()) {
+			List<Solicitation> solicitations = solicitationRepository.findByCustomerId(id);
+			for (Solicitation sol: solicitations) {
+				if (sol.getSolicitationDate() == monthValue) {
+					paymentMonthValue += 0.1;
+				}
+			}
+			returnValue.setPaymentValue(paymentMonthValue);
+			returnValue.setStatus("Success returned value.");
+		} else {
+			returnValue.setPaymentValue(0.0);
+			returnValue.setStatus("Customer is not present in our database...");
+		}
+		return returnValue;
+	}
 
+	/**
+	 * Add a Customer
+	 * @param customer
+	 * @return
+	 */
 	@PostMapping("/customers")
 	public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
 		try {
@@ -70,6 +136,12 @@ public class CustomerController {
 		}
 	}
 
+	/**
+	 * Update a Customer
+	 * @param id
+	 * @param customer
+	 * @return
+	 */
 	@PutMapping("/customers/{id}")
 	public ResponseEntity<Customer> updateCustomer(@PathVariable("id") long id, @RequestBody Customer customer) {
 		Optional<Customer> customerData = customerRepository.findById(id);
@@ -84,6 +156,11 @@ public class CustomerController {
 		}
 	}
 
+	/**
+	 * Delete a Customer by Id
+	 * @param id
+	 * @return
+	 */
 	@DeleteMapping("/customers/{id}")
 	public ResponseEntity<HttpStatus> deleteCustomer(@PathVariable("id") long id) {
 		try {
@@ -94,6 +171,10 @@ public class CustomerController {
 		}
 	}
 
+	/**
+	 * Delete all Customers from the base
+	 * @return
+	 */
 	@DeleteMapping("/customers")
 	public ResponseEntity<HttpStatus> deleteAllCustomers() {
 		try {

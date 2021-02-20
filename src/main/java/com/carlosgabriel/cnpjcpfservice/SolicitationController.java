@@ -1,6 +1,8 @@
 package com.carlosgabriel.cnpjcpfservice;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller responsável por lidar com as operações
- * referentes às Solicitações
+ * Solicitation Controller
+ * Contains all REST Functions from Solicitations
  * @author Carlos Gabriel
  *
  */
@@ -33,13 +35,18 @@ public class SolicitationController {
 	@Autowired
 	CustomerRepository customerRepository;
 	
+	/**
+	 * Return all Solicitations from a Customer
+	 * @param customerId
+	 * @return
+	 */
 	@GetMapping("/customers/{customerId}/solicitations")
 	public ResponseEntity<List<Solicitation>> getSolicitationsByCustomerId(@PathVariable Long customerId) {
 		try {
 			List<Solicitation> solicitations = new ArrayList<Solicitation>();
 			
 			if (!customerRepository.existsById(customerId)) {
-				throw new NotFoundException("Student not found!");
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
 			if (customerId == null)
@@ -57,20 +64,37 @@ public class SolicitationController {
 		}
 	}
 
-    @PostMapping("/customers/{customerId}/solicitations")
+    /**
+     * Create a Solicitation to a Customer in the base
+     * @param customerId
+     * @param solicitation
+     * @return
+     */
+	@SuppressWarnings("deprecation")
+	@PostMapping("/customers/{customerId}/solicitations")
     public ResponseEntity<Solicitation> addSolicitation(@PathVariable Long customerId,
                             @RequestBody Solicitation solicitation) {
-    	boolean validado;
+    	boolean validado = false;
+    	/**
+    	 * Verifica a quantidade de dígitos, se for incompatível com a quantidade de um
+    	 * CPF ou CNPJ, retorna um erro do tipo BAD_REQUEST
+    	 */
     	if (solicitation.getValue().length() == 11) {
     		validado = isCPF(solicitation.getValue());
-    	}else {
+    	}else if (solicitation.getValue().length() == 14){
     		validado = isCNPJ(solicitation.getValue());
+    	} else {
+    		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     	}
     	Optional<Customer> customerData = customerRepository.findById(customerId);
 
 		if (customerData.isPresent()) {
 			solicitation.setCustomer(customerData.get());
 			solicitation.setValid(validado);
+			Date solicitationDate = Calendar.getInstance().getTime();
+			solicitation.setSolicitationDate(solicitationDate.getMonth() + 1);
+			customerData.get().setPayment(customerData.get().getPayment() + 0.10);
+			customerRepository.save(customerData.get());
 			Solicitation _solicitation = solicitationRepository.save(solicitation);
 			return new ResponseEntity<>(_solicitation, HttpStatus.CREATED);
 		} else {
@@ -78,44 +102,63 @@ public class SolicitationController {
 		}
     }
 
-	@PutMapping("customers/{customerId}/solicitation/{id}")
-	public Solicitation updateSolicitation(@PathVariable Long customerId, @PathVariable long id, @RequestBody Solicitation solicitationUpdated) {
-    	if(!customerRepository.existsById(customerId)) {
-    		throw new NotFoundException("Customer not found!");
-    	}
-    	
-        return solicitationRepository.findById(id)
-                .map(solicitation -> {
-                	solicitation.setValue(solicitationUpdated.getValue());
-                	solicitation.setDescription(solicitationUpdated.getDescription());
-                	solicitation.setValid(solicitationUpdated.isValid());
-                    return solicitationRepository.save(solicitation);
-                }).orElseThrow(() -> new NotFoundException("Solicitation not found!"));
+	/**
+	 * Update a Solicitation from a Customer by Id
+	 * @param customerId
+	 * @param id
+	 * @param solicitationUpdated
+	 * @return
+	 */
+	@PutMapping("customers/{customerId}/solicitations/{id}")
+	public ResponseEntity<Solicitation> updateSolicitation(@PathVariable Long customerId, @PathVariable long id, @RequestBody Solicitation solicitationUpdated) {
+		Optional<Customer> customerData = customerRepository.findById(customerId);
+		boolean validado = false;
+		if (customerData.isPresent()) {
+			Optional<Solicitation> solicitationData = solicitationRepository.findById(id);
+			if (solicitationData.isPresent()) {
+            	solicitationData.get().setValue(solicitationUpdated.getValue());
+            	solicitationData.get().setDescription(solicitationUpdated.getDescription());
+            	if (solicitationUpdated.getValue().length() == 11) {
+            		validado = isCPF(solicitationUpdated.getValue());
+            	}else if (solicitationUpdated.getValue().length() == 14){
+            		validado = isCNPJ(solicitationUpdated.getValue());
+            	} else {
+            		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            	}
+            	solicitationData.get().setValid(validado);
+                solicitationRepository.save(solicitationData.get());
+                return new ResponseEntity<>(solicitationData.get(), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		}else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 
-	@DeleteMapping("customers/{customerId}/solicitation/{id}")
-	public String deleteSolicitation(@PathVariable long customerId, @PathVariable("id") long id) {
-		if(!customerRepository.existsById(customerId)) {
-    		throw new NotFoundException("Customer not found!");
-    	}
-    	
-        return solicitationRepository.findById(id)
-                .map(solicitation -> {
-                    solicitationRepository.delete(solicitation);
-                    return "Deleted Successfully!";
-                }).orElseThrow(() -> new NotFoundException("Solicitation not found!"));
+	/**
+	 * Remove a Solicitation from a Customer
+	 * @param customerId
+	 * @param id
+	 * @return
+	 */
+	@DeleteMapping("customers/{customerId}/solicitations/{id}")
+	public ResponseEntity<HttpStatus> deleteSolicitation(@PathVariable long customerId, @PathVariable("id") long id) {
+		try {
+			solicitationRepository.deleteById(id);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
-
-
 	
 	/**
-	 * Função que verifica se o CPF é valido
+	 * CPF Validation
 	 * 
 	 * @param CPF
 	 * @return
 	 */
 	public static boolean isCPF(String CPF) {
-		// Verificações simples
 		if (CPF.equals("00000000000") || CPF.equals("11111111111") || CPF.equals("22222222222")
 				|| CPF.equals("33333333333") || CPF.equals("44444444444") || CPF.equals("55555555555")
 				|| CPF.equals("66666666666") || CPF.equals("77777777777") || CPF.equals("88888888888")
@@ -125,7 +168,6 @@ public class SolicitationController {
 		char dig10, dig11;
 		int sm, i, r, num, peso;
 
-		// Tratamento de Exceções
 		try {
 			sm = 0;
 			peso = 10;
@@ -139,7 +181,7 @@ public class SolicitationController {
 			if ((r == 10) || (r == 11))
 				dig10 = '0';
 			else
-				dig10 = (char) (r + 48); // converte no respectivo caractere numerico
+				dig10 = (char) (r + 48);
 
 			sm = 0;
 			peso = 11;
@@ -164,8 +206,12 @@ public class SolicitationController {
 		}
 	}
 	
+	/**
+	 * CNPJ Validation
+	 * @param CNPJ
+	 * @return
+	 */
 	public static boolean isCNPJ(String CNPJ) {
-		// Verificações simples
 		if (CNPJ.equals("00000000000000") || CNPJ.equals("11111111111111") || CNPJ.equals("22222222222222")
 				|| CNPJ.equals("33333333333333") || CNPJ.equals("44444444444444") || CNPJ.equals("55555555555555")
 				|| CNPJ.equals("66666666666666") || CNPJ.equals("77777777777777") || CNPJ.equals("88888888888888")

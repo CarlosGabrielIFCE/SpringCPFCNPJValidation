@@ -30,6 +30,9 @@ public class Solicitation implements Serializable{
 	@Column(name = "is_valid")
 	private boolean isValid;
 	
+	@Column(name = "solicitation_date")
+	private int solicitationDate;
+	
 	@ManyToOne
 	@JoinColumn(name="customer_id")
 	@JsonIgnore
@@ -37,10 +40,11 @@ public class Solicitation implements Serializable{
 	
 	public Solicitation() {}
 
-	public Solicitation(String value, String description, boolean isValid) {
+	public Solicitation(String value, String description, boolean isValid, int solicitationDate) {
 		this.value = value;
 		this.description = description;
 		this.isValid = isValid;
+		this.solicitationDate = solicitationDate;
 	}
 
 	public long getId() {
@@ -65,6 +69,14 @@ public class Solicitation implements Serializable{
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public int getSolicitationDate() {
+		return solicitationDate;
+	}
+
+	public void setSolicitationDate(int solicitationDate) {
+		this.solicitationDate = solicitationDate;
 	}
 
 	public boolean isValid() {
