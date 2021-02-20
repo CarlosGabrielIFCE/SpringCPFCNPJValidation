@@ -85,9 +85,9 @@ Endpoints importantes da aplicação:
 	
  - Payments
  
-	- GET THE TOTAL PAYMENT FROM A CUSTOMER - /api/customers/{customerId}/payment
+	- GET THE TOTAL PAYMENT FROM A CUSTOMER - /customers/{customerId}/payment
 	
-	- GET THE MONTH PAYMENT FROM A CUSTOMER - /api/customers/{customerId}/payment/{month}
+	- GET THE MONTH PAYMENT FROM A CUSTOMER - /customers/{customerId}/payment/{month}
 ```
 
 
