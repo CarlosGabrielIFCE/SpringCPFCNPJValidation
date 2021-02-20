@@ -33,9 +33,10 @@ Seguem abaixo as Dependências que foram utilizadas:
 
 Para utilização do aplicativo, você pode fazer o download do repositório e rodar em sua máquina.
 Foi feito também um deploy da aplicação para o Heroku, para que não seja necessário baixar o projeto,
-dessa forma, é apenas necessário fazer as requsições utilizando o seu REST Service de preferência
+dessa forma, é apenas necessário fazer as requsições utilizando o seu REST Service de preferência.
 
 URL de requisição Local: ```http://localhost:8080/api/```
+
 URL de requisição de Produção: ```https://stark-tor-87979.herokuapp.com/api/```
 
 Endpoints importantes da aplicação:
