@@ -21,8 +21,7 @@ Foram criadas duas Entidades:
 Foram criados os Repositories para flexibilizar a criação dos métodos do CRUD das entidades.
 Por último, foram criados os Controllers, com as Anotações necessárias para que seja possível realizar requisições REST.
 
-Foram criadas também uma classe para fazer um tratamento de erros nas requisições(NotFoundException) e a configuração do Banco de Dados para
-ser enviado ao Heroku.
+Foram criadas também uma classe para fazer a configuração do Banco de Dados para ser enviado ao Heroku.
 
 Seguem abaixo as Dependências que foram utilizadas:
 
@@ -30,14 +29,65 @@ Seguem abaixo as Dependências que foram utilizadas:
   - ``` Spring Data JPA ``` 
   - ``` PostgreSQL ```
 
-### Demonstração
+### Modo de Utilização
 
-Para ilustrar a utilização do aplicativo, você pode fazer o download do repositório e rodar em sua máquina.
-Foi feito também um deploy para o Heroku, onde é possível fazer as requisições utilizando a sua ferramenta
-de envio de requisições REST de preferência.
+Para utilização do aplicativo, você pode fazer o download do repositório e rodar em sua máquina.
+Foi feito também um deploy da aplicação para o Heroku, para que não seja necessário baixar o projeto,
+dessa forma, é apenas necessário fazer as requsições utilizando o seu REST Service de preferência
 
-URL de requisição da API: [Clique aqui](https://stark-tor-87979.herokuapp.com/api/)
+URL de requisição Local: ```http://localhost:8080/api/```
+URL de requisição de Produção: ```https://stark-tor-87979.herokuapp.com/api/```
 
+Endpoints importantes da aplicação:
+```
+ - Customers
+ 
+	- GET ALL- /customers
+ 
+ 	- GET BY ID - /api/customers/{id}
+	
+	- POST - /customers/
+			{
+				"email": "email@gmail.com",
+				"password": "12345678"
+			}
+	
+	- PUT - /customers/{id}
+			{
+				"email": "email@gmail.com",
+				"password": "12345678"
+			}
+	
+	- DELETE BY ID - /api/customers/{id}
+	
+	- DELETE ALL  - /api/customers/
+	
+ - Solicitations
+ 
+	- GET ALL FROM A CUSTOMER - /customers/{customerId}/solicitations
+	
+	- GET BY ID = /customers/{customerId}/solicitations/{id}
+	
+	- POST - /customers/{customerId}/solicitations
+			{
+				"value": "email@gmail.com",
+				"description": ""
+			}
+	
+	- PUT - /customers/{customerId}/solicitations/{id}
+			{
+				"value": "email@gmail.com",
+				"description": ""
+			}
+
+	- DELETE BY ID - /customers/{customerId}/solicitations/{id}
+	
+ - Payments
+ 
+	- GET THE TOTAL PAYMENT FROM A CUSTOMER - /api/customers/{customerId}/payment
+	
+	- GET THE MONTH PAYMENT FROM A CUSTOMER - /api/customers/{customerId}/payment/{month}
+```
 
 
 
